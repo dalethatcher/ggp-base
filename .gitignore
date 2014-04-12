@@ -1,1 +1,5 @@
-/bin
+bin
+logs
+*.iml
+*.ipr
+*.iws
