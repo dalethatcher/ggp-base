@@ -1,0 +1,15 @@
+(role player)
+
+(init (square 0))
+
+(<= (legal player (move 0 1))
+    (true (square 0)))
+
+(<= (next (square ?m))
+    (does player (move ?n ?m)))
+
+(<= terminal
+    (square 1))
+
+(<= (goal player 100)
+    (square 1))
