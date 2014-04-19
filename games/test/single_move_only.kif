@@ -9,7 +9,7 @@
     (does player (move ?n ?m)))
 
 (<= terminal
-    (square 1))
+    (true (square 1)))
 
 (<= (goal player 100)
-    (square 1))
+    (true (square 1)))
