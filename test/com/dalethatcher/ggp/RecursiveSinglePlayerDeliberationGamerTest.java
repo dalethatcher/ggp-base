@@ -13,13 +13,13 @@ import static org.ggp.base.util.gdl.grammar.GdlPool.getFunction;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class DeliberationGamerTest {
+public class RecursiveSinglePlayerDeliberationGamerTest {
     @Test
     public void picksLegalMove() throws Exception {
         Game game = new TestGameRepository().getGame("single_move_only");
         Match match = new Match("id", 0, 0, 0, game);
 
-        DeliberationGamer gamer = new DeliberationGamer();
+        RecursiveSinglePlayerDeliberationGamer gamer = new RecursiveSinglePlayerDeliberationGamer();
         gamer.setMatch(match);
         gamer.setRoleName(getConstant("player"));
         gamer.metaGame(1000);
@@ -35,7 +35,7 @@ public class DeliberationGamerTest {
         Game game = new TestGameRepository().getGame("two_moves_only");
         Match match = new Match("id", 0, 0, 0, game);
 
-        DeliberationGamer gamer = new DeliberationGamer();
+        RecursiveSinglePlayerDeliberationGamer gamer = new RecursiveSinglePlayerDeliberationGamer();
         gamer.setMatch(match);
         gamer.setRoleName(getConstant("player"));
         gamer.metaGame(1000);

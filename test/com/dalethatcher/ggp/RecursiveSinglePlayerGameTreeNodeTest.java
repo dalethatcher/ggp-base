@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GameTreeNodeTest {
+public class RecursiveSinglePlayerGameTreeNodeTest {
     @Mock
     private MachineState rootState;
     @Mock
@@ -53,7 +53,7 @@ public class GameTreeNodeTest {
                 thenThrow(new MoveDefinitionException(lhsChildState, role));
         when(stateMachine.isTerminal(lhsChildState)).thenReturn(true);
 
-        GameTreeNode root = new GameTreeNode(rootState, role, 0);
+        RecursiveSinglePlayerGameTreeNode root = new RecursiveSinglePlayerGameTreeNode(rootState, role, 0);
         root.resolveTree(stateMachine);
 
         verify(stateMachine).getLegalMoves(lhsState, role);
@@ -73,7 +73,7 @@ public class GameTreeNodeTest {
         when(stateMachine.isTerminal(rhsState)).thenReturn(true);
         when(stateMachine.getGoal(rhsState, role)).thenReturn(100);
 
-        GameTreeNode root = new GameTreeNode(rootState, role, 0);
+        RecursiveSinglePlayerGameTreeNode root = new RecursiveSinglePlayerGameTreeNode(rootState, role, 0);
         root.resolveTree(stateMachine);
         Move bestMove = root.bestKnownMove();
 

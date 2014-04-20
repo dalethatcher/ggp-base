@@ -12,7 +12,7 @@ import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 import org.ggp.base.util.statemachine.implementation.prover.ProverStateMachine;
 
-public class DeliberationGamer extends StateMachineGamer {
+public class RecursiveSinglePlayerDeliberationGamer extends StateMachineGamer {
     @Override
     public StateMachine getInitialStateMachine() {
         return new ProverStateMachine();
@@ -28,8 +28,8 @@ public class DeliberationGamer extends StateMachineGamer {
         MachineState currentState = getCurrentState();
         Role role = getRole();
 
-        int goal = GameTreeNode.goalOrZero(stateMachine, currentState, role);
-        GameTreeNode root = new GameTreeNode(currentState, role, goal);
+        int goal = RecursiveSinglePlayerGameTreeNode.goalOrZero(stateMachine, currentState, role);
+        RecursiveSinglePlayerGameTreeNode root = new RecursiveSinglePlayerGameTreeNode(currentState, role, goal);
 
         root.resolveTree(stateMachine);
 
@@ -53,6 +53,6 @@ public class DeliberationGamer extends StateMachineGamer {
 
     @Override
     public String getName() {
-        return "DeliberationGamer";
+        return "RecursiveSinglePlayerDeliberationGamer";
     }
 }

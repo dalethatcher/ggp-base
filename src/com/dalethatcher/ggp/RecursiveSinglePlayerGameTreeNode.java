@@ -11,13 +11,13 @@ import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 
 import java.util.Map;
 
-public class GameTreeNode {
+public class RecursiveSinglePlayerGameTreeNode {
     private final MachineState state;
     private final Role role;
     private final int goal;
-    private final Map<Move, GameTreeNode> children;
+    private final Map<Move, RecursiveSinglePlayerGameTreeNode> children;
 
-    public GameTreeNode(MachineState state, Role role, int goal) {
+    public RecursiveSinglePlayerGameTreeNode(MachineState state, Role role, int goal) {
         this.state = state;
         this.role = role;
         this.goal = goal;
@@ -33,7 +33,7 @@ public class GameTreeNode {
             for (Move move : stateMachine.getLegalMoves(state, role)) {
                 MachineState newState = stateMachine.getNextState(state, Lists.newArrayList(move));
                 int goal = goalOrZero(stateMachine, newState, role);
-                GameTreeNode child = new GameTreeNode(newState, role, goal);
+                RecursiveSinglePlayerGameTreeNode child = new RecursiveSinglePlayerGameTreeNode(newState, role, goal);
                 child.resolveTree(stateMachine);
 
                 children.put(move, child);
@@ -48,7 +48,7 @@ public class GameTreeNode {
         Move bestMove = null;
         int bestGoal = 0;
 
-        for (Map.Entry<Move, GameTreeNode> entry : children.entrySet()) {
+        for (Map.Entry<Move, RecursiveSinglePlayerGameTreeNode> entry : children.entrySet()) {
             int childGoal = entry.getValue().getMaxGoal();
 
             if (bestMove == null || childGoal > bestGoal) {
@@ -63,7 +63,7 @@ public class GameTreeNode {
     private int getMaxGoal() {
         int maxFound = goal;
 
-        for (GameTreeNode child : children.values()) {
+        for (RecursiveSinglePlayerGameTreeNode child : children.values()) {
             int childGoal = child.getMaxGoal();
 
             if (childGoal > maxFound) {
