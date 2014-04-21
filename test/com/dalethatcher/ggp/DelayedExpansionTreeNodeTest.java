@@ -8,6 +8,7 @@ import org.ggp.base.util.statemachine.StateMachine;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -26,11 +27,23 @@ public class DelayedExpansionTreeNodeTest {
     @Mock
     private MachineState childState;
     @Mock
+    private MachineState lhsGrandChildState;
+    @Mock
+    private MachineState lhsGrandGrandChildState;
+    @Mock
+    private MachineState rhsGrandChildState;
+    @Mock
     private Role roleA;
     @Mock
     private Role roleB;
     @Mock
     private Move firstMove;
+    @Mock
+    private Move lhsChildMove;
+    @Mock
+    private Move rhsChildMove;
+    @Mock
+    private Move lhsChildChildMove;
     @Mock
     private Move noopMove;
 
@@ -38,17 +51,29 @@ public class DelayedExpansionTreeNodeTest {
     public void setUpMocks() throws Exception {
         when(stateMachine.getRoles()).thenReturn(Lists.newArrayList(roleA, roleB));
         when(stateMachine.isTerminal(rootState)).thenReturn(false);
-        List<List<Move>> firstMovePairList = singleMovePair(firstMove, noopMove);
-        when(stateMachine.getLegalJointMoves(rootState)).thenReturn(firstMovePairList);
+        when(stateMachine.getLegalJointMoves(rootState)).thenReturn(toMovePairList(firstMove, noopMove));
 
-        when(stateMachine.getNextState(rootState, firstMovePairList.get(0))).thenReturn(childState);
-        when(stateMachine.isTerminal(childState)).thenReturn(true);
+        when(stateMachine.getNextState(rootState, toMovePairList(firstMove, noopMove).get(0))).thenReturn(childState);
+        when(stateMachine.isTerminal(childState)).thenReturn(false);
+        when(stateMachine.getLegalJointMoves(childState)).thenReturn(toMovePairList(noopMove, lhsChildMove,
+                noopMove, rhsChildMove));
+
+        when(stateMachine.getNextState(childState, toMovePair(noopMove, lhsChildMove))).thenReturn(lhsGrandChildState);
+        when(stateMachine.getNextState(childState, toMovePair(noopMove, rhsChildMove))).thenReturn(rhsGrandChildState);
+
+        when(stateMachine.isTerminal(lhsGrandChildState)).thenReturn(false);
+        when(stateMachine.getLegalJointMoves(lhsGrandChildState)).thenReturn(toMovePairList(lhsChildChildMove, noopMove));
+        when(stateMachine.getNextState(lhsGrandChildState, toMovePair(lhsChildChildMove, noopMove))).thenReturn(lhsGrandGrandChildState);
+
+        when(stateMachine.isTerminal(rhsGrandChildState)).thenReturn(true);
+
+        when(stateMachine.isTerminal(lhsGrandGrandChildState)).thenReturn(true);
     }
 
     @Test
     public void onlyExpandsNodesWhenRequested() throws Exception {
         DelayedExpansionTreeNode root = new DelayedExpansionTreeNode(rootState);
-        root.calculatePossibleMoves(stateMachine);
+        root.getPossibleMoves(stateMachine);
 
         verify(stateMachine).getLegalJointMoves(rootState);
         verify(stateMachine, never()).getLegalJointMoves(childState);
@@ -57,8 +82,8 @@ public class DelayedExpansionTreeNodeTest {
     @Test
     public void onlyExpandsNodeOnce() throws Exception {
         DelayedExpansionTreeNode root = new DelayedExpansionTreeNode(rootState);
-        root.calculatePossibleMoves(stateMachine);
-        root.calculatePossibleMoves(stateMachine);
+        root.getPossibleMoves(stateMachine);
+        root.getPossibleMoves(stateMachine);
 
         verify(stateMachine).getLegalJointMoves(rootState);
         verify(stateMachine, never()).getLegalJointMoves(childState);
@@ -67,9 +92,8 @@ public class DelayedExpansionTreeNodeTest {
     @Test
     public void canExpandMove() throws Exception {
         DelayedExpansionTreeNode root = new DelayedExpansionTreeNode(rootState);
-        root.calculatePossibleMoves(stateMachine);
 
-        List<Move> possibleMove = root.getPossibleMoves().get(0);
+        List<Move> possibleMove = root.getPossibleMoves(stateMachine).get(0);
         DelayedExpansionTreeNode childNode = root.expandMove(stateMachine, possibleMove);
 
         assertThat(childNode, notNullValue());
@@ -77,9 +101,31 @@ public class DelayedExpansionTreeNodeTest {
         verify(stateMachine).getNextState(rootState, possibleMove);
     }
 
-    private List<List<Move>> singleMovePair(Move... moves) {
+    @Test
+    public void canExpandDepthFirst() throws Exception {
+        DelayedExpansionTreeNode root = new DelayedExpansionTreeNode(rootState);
+        root.expandDepthFirst(stateMachine);
+
+        InOrder inOrder = inOrder(stateMachine);
+        inOrder.verify(stateMachine).getLegalJointMoves(rootState);
+        inOrder.verify(stateMachine).getNextState(rootState, toMovePair(firstMove, noopMove));
+        inOrder.verify(stateMachine).getLegalJointMoves(childState);
+        inOrder.verify(stateMachine).getNextState(childState, toMovePair(noopMove, lhsChildMove));
+        inOrder.verify(stateMachine).getLegalJointMoves(lhsGrandChildState);
+        inOrder.verify(stateMachine).getNextState(lhsGrandChildState, toMovePair(lhsChildChildMove, noopMove));
+        inOrder.verify(stateMachine).getNextState(childState, toMovePair(noopMove, rhsChildMove));
+    }
+
+    private List<Move> toMovePair(Move one, Move two) {
+        return Lists.newArrayList(one, two);
+    }
+
+    private List<List<Move>> toMovePairList(Move... moves) {
         List<List<Move>> result = Lists.newArrayList();
-        result.add(Lists.newArrayList(moves));
+
+        for (int i = 0; i < moves.length; i += 2) {
+            result.add(toMovePair(moves[i], moves[i + 1]));
+        }
 
         return result;
     }
