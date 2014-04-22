@@ -1,10 +1,12 @@
 package com.dalethatcher.ggp;
 
 import com.google.common.collect.Lists;
+import org.ggp.base.util.game.TestGameRepository;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
 import org.ggp.base.util.statemachine.StateMachine;
+import org.ggp.base.util.statemachine.implementation.prover.ProverStateMachine;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +16,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
 
+import static org.ggp.base.util.gdl.grammar.GdlPool.getConstant;
+import static org.ggp.base.util.gdl.grammar.GdlPool.getFunction;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -126,6 +130,18 @@ public class DelayedExpansionTreeNodeTest {
 
         assertThat(bestMove, is(noopMove));
         verify(stateMachine, never()).getNextState(any(MachineState.class), anyListOf(Move.class));
+    }
+
+    @Test
+    public void getExpectedMoveForMinMaxTree() throws Exception {
+        ProverStateMachine proverStateMachine = new ProverStateMachine();
+        proverStateMachine.initialize(new TestGameRepository().getGame("min_max_simple_game").getRules());
+
+        DelayedExpansionTreeNode root = new DelayedExpansionTreeNode(proverStateMachine.getInitialState());
+        Move bestMove = root.getBestMoveByMinMax(proverStateMachine, proverStateMachine.getRoles().get(0));
+
+        Move expectedMove = new Move(getFunction(getConstant("move"), Lists.newArrayList(getConstant("A"), getConstant("C"))));
+        assertThat(bestMove, is(expectedMove));
     }
 
     private List<Move> toMovePair(Move one, Move two) {

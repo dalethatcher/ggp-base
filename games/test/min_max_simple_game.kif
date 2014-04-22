@@ -1,0 +1,67 @@
+;; Game board
+;; Players move left or right at each step
+;; Final values are goal for white (black is 100 - white's goal)
+;;
+;;             A
+;;           /   \
+;;          B     C
+;;         / \   / \
+;;        D   E F   G
+;;       0  100 25  50
+
+(role white)
+(role black)
+
+(init (square A))
+(init (control white))
+
+(<= (legal ?c (move ?f ?t))
+    (true (control ?c))
+    (true (square ?f))
+    (succ ?f ?t))
+
+(<= (legal white noop)
+    (true (control black)))
+(<= (legal black noop)
+    (true (control white)))
+
+(<= (next (square ?t))
+    (does ?c (move ?f ?t))
+    (true (control ?c)))
+
+(<= (next (control white))
+    (true (control black)))
+(<= (next (control black))
+    (true (control white)))
+
+(<= terminal (true (square D)))
+(<= terminal (true (square E)))
+(<= terminal (true (square F)))
+(<= terminal (true (square G)))
+
+(<= (goal white 0)
+    (true (square D)))
+(<= (goal black 100)
+    (true (square D)))
+
+(<= (goal white 100)
+    (true (square E)))
+(<= (goal black 0)
+    (true (square E)))
+
+(<= (goal white 25)
+    (true (square F)))
+(<= (goal black 75)
+    (true (square F)))
+
+(<= (goal white 50)
+    (true (square G)))
+(<= (goal black 50)
+    (true (square G)))
+
+(succ A B)
+(succ A C)
+(succ B D)
+(succ B E)
+(succ C F)
+(succ C G)

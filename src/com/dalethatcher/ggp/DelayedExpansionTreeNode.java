@@ -7,6 +7,7 @@ import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
 import org.ggp.base.util.statemachine.Role;
 import org.ggp.base.util.statemachine.StateMachine;
+import org.ggp.base.util.statemachine.exceptions.GoalDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 
@@ -99,14 +100,51 @@ public class DelayedExpansionTreeNode {
 
     public Move getBestMoveByMinMax(StateMachine stateMachine, Role role) {
         try {
-            List<Move> possibleMoves = stateMachine.getLegalMoves(state, role);
+            List<Move> possibleMovesForRole = stateMachine.getLegalMoves(state, role);
 
-            if (possibleMoves.size() == 1) {
-                return possibleMoves.get(0);
+            if (possibleMovesForRole.size() == 1) {
+                return possibleMovesForRole.get(0);
             }
 
-            return null;
+            expandDepthFirst(stateMachine);
+
+            int roleIndex = stateMachine.getRoleIndices().get(role);
+            int bestScore = 0;
+            Move bestMove = null;
+            for (List<Move> move : possibleMoves) {
+                int score = children.get(move).getMinMaxScore(stateMachine, role, false);
+
+                if (bestMove == null || score > bestScore) {
+                    bestScore = score;
+                    bestMove = move.get(roleIndex);
+                }
+            }
+
+            return bestMove;
         } catch (MoveDefinitionException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    private int getMinMaxScore(StateMachine stateMachine, Role role, boolean maximise) {
+        try {
+            if (stateMachine.isTerminal(state)) {
+                return stateMachine.getGoal(state, role);
+            }
+            else {
+                int bestScore = maximise ? 0 : 100;
+
+                for (List<Move> move : possibleMoves) {
+                    int score = children.get(move).getMinMaxScore(stateMachine, role, !maximise);
+
+                    if ((maximise && score > bestScore) || (!maximise && score < bestScore)) {
+                       bestScore = score;
+                    }
+                }
+
+                return bestScore;
+            }
+        } catch (GoalDefinitionException e) {
             throw Throwables.propagate(e);
         }
     }
