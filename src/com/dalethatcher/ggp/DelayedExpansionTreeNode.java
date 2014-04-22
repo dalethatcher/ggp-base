@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.ggp.base.util.statemachine.MachineState;
 import org.ggp.base.util.statemachine.Move;
+import org.ggp.base.util.statemachine.Role;
 import org.ggp.base.util.statemachine.StateMachine;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
@@ -94,5 +95,19 @@ public class DelayedExpansionTreeNode {
 
     public boolean isFullyExpanded(StateMachine stateMachine) {
         return getUnexploredMoves(stateMachine).isEmpty();
+    }
+
+    public Move getBestMoveByMinMax(StateMachine stateMachine, Role role) {
+        try {
+            List<Move> possibleMoves = stateMachine.getLegalMoves(state, role);
+
+            if (possibleMoves.size() == 1) {
+                return possibleMoves.get(0);
+            }
+
+            return null;
+        } catch (MoveDefinitionException e) {
+            throw Throwables.propagate(e);
+        }
     }
 }

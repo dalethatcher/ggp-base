@@ -14,6 +14,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
@@ -52,6 +53,8 @@ public class DelayedExpansionTreeNodeTest {
         when(stateMachine.getRoles()).thenReturn(Lists.newArrayList(roleA, roleB));
         when(stateMachine.isTerminal(rootState)).thenReturn(false);
         when(stateMachine.getLegalJointMoves(rootState)).thenReturn(toMovePairList(firstMove, noopMove));
+        when(stateMachine.getLegalMoves(rootState, roleA)).thenReturn(Lists.newArrayList(firstMove));
+        when(stateMachine.getLegalMoves(rootState, roleB)).thenReturn(Lists.newArrayList(noopMove));
 
         when(stateMachine.getNextState(rootState, toMovePairList(firstMove, noopMove).get(0))).thenReturn(childState);
         when(stateMachine.isTerminal(childState)).thenReturn(false);
@@ -114,6 +117,15 @@ public class DelayedExpansionTreeNodeTest {
         inOrder.verify(stateMachine).getLegalJointMoves(lhsGrandChildState);
         inOrder.verify(stateMachine).getNextState(lhsGrandChildState, toMovePair(lhsChildChildMove, noopMove));
         inOrder.verify(stateMachine).getNextState(childState, toMovePair(noopMove, rhsChildMove));
+    }
+
+    @Test
+    public void ifOnlyOnePossibleMoveReturnsImmediately() throws Exception {
+        DelayedExpansionTreeNode root = new DelayedExpansionTreeNode(rootState);
+        Move bestMove = root.getBestMoveByMinMax(stateMachine, roleB);
+
+        assertThat(bestMove, is(noopMove));
+        verify(stateMachine, never()).getNextState(any(MachineState.class), anyListOf(Move.class));
     }
 
     private List<Move> toMovePair(Move one, Move two) {
