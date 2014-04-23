@@ -148,4 +148,21 @@ public class DelayedExpansionTreeNode {
             throw Throwables.propagate(e);
         }
     }
+
+    public MachineState getState() {
+        return state;
+    }
+
+    public boolean isTerminal(StateMachine stateMachine) {
+        return stateMachine.isTerminal(state);
+    }
+
+    public int getGoal(StateMachine stateMachine, Role role) {
+        try {
+            return stateMachine.getGoal(state, role);
+        }
+        catch (GoalDefinitionException e) {
+            throw Throwables.propagate(e);
+        }
+    }
 }
