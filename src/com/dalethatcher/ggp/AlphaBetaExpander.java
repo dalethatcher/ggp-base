@@ -93,12 +93,4 @@ public class AlphaBetaExpander {
             return bestGoal;
         }
     }
-
-    private static enum NodeType {
-        MAX, MIN;
-
-        public NodeType opposite() {
-            return (this == MAX) ? MIN : MAX;
-        }
-    }
 }
