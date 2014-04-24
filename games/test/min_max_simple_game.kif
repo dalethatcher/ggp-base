@@ -4,7 +4,7 @@
 ;;
 ;;             A
 ;;           /   \
-;;          B     C
+;;          B 5   C        Limited goal is 5 for white only
 ;;         / \   / \
 ;;        D   E F   G
 ;;       0  100 25  50
@@ -58,6 +58,9 @@
     (true (square G)))
 (<= (goal black 50)
     (true (square G)))
+
+(<= (goal white 5)
+    (true (square B)))
 
 (succ A B)
 (succ A C)

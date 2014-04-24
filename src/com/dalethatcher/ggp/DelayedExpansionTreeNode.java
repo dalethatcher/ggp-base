@@ -165,4 +165,14 @@ public class DelayedExpansionTreeNode {
             throw Throwables.propagate(e);
         }
     }
+
+    @Override
+    public String toString() {
+        return "DelayedExpansionTreeNode{" +
+                "state=" + state +
+                ", children=" + children +
+                ", possibleMoves=" + possibleMoves +
+                ", unexploredMoves=" + unexploredMoves +
+                '}';
+    }
 }
