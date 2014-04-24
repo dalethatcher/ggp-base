@@ -27,7 +27,7 @@ public class DrtLimitedDepthGamer extends StateMachineGamer {
     public Move stateMachineSelectMove(long timeout) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
         DrtLimitedDepthExpander expander = new DrtLimitedDepthExpander(getCurrentState());
 
-        return expander.findBestDepthLimitedMove(getStateMachine(), getRole(), timeout - 500, 2);
+        return expander.findBestDepthLimitedMove(getStateMachine(), getRole(), timeout - 500, (a, b) -> 0, 2);
     }
 
     @Override

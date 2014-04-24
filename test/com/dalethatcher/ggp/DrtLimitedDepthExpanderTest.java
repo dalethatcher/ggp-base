@@ -34,13 +34,32 @@ public class DrtLimitedDepthExpanderTest {
         Role role = stateMachine.getRoleFromConstant(getConstant("white"));
 
         DrtLimitedDepthExpander expander = new DrtLimitedDepthExpander(rootState);
-        Move bestMove = expander.findBestDepthLimitedMove(stateMachine, role, System.currentTimeMillis() + 1000, 0);
+        Move bestMove = expander.findBestDepthLimitedMove(stateMachine, role, System.currentTimeMillis() + 1000,
+                (a, b) -> 0, 0);
 
         Move expectedMove = new Move(
                 getFunction(getConstant("move"), newArrayList(getConstant("A"), getConstant("B"))));
         assertThat(bestMove, is(expectedMove));
 
         GdlSentence unexploredState = (GdlSentence) GdlFactory.create("(true (square D))");
+        verify(stateMachine, never()).isTerminal(new MachineState(Sets.newHashSet(unexploredState)));
+    }
+
+    @Test
+    public void usesSpecifiedHeuristic() throws Exception {
+        stateMachine.initialize(new TestGameRepository().getGame("min_max_simple_game").getRules());
+        MachineState rootState = stateMachine.getInitialState();
+        Role role = stateMachine.getRoleFromConstant(getConstant("white"));
+
+        DrtLimitedDepthExpander expander = new DrtLimitedDepthExpander(rootState);
+        Move bestMove = expander.findBestDepthLimitedMove(stateMachine, role, System.currentTimeMillis() + 1000,
+                (stateMachine, state) -> 10, 0);
+
+        Move expectedMove = new Move(
+                getFunction(getConstant("move"), newArrayList(getConstant("A"), getConstant("C"))));
+        assertThat(bestMove, is(expectedMove));
+
+        GdlSentence unexploredState = (GdlSentence) GdlFactory.create("(true (square G))");
         verify(stateMachine, never()).isTerminal(new MachineState(Sets.newHashSet(unexploredState)));
     }
 }
