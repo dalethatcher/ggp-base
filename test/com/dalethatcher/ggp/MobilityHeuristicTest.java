@@ -15,8 +15,8 @@ public class MobilityHeuristicTest {
         stateMachine.initialize(new TestGameRepository().getGame("min_max_simple_game").getRules());
         Role role = stateMachine.getRoles().get(0);
 
-        int huristicGoalScore = new MobilityHeuristic(6).apply(stateMachine, stateMachine.getInitialState(), role);
+        int heuristicGoalScore = new MobilityHeuristic(6).apply(stateMachine, stateMachine.getInitialState(), role);
 
-        assertThat(huristicGoalScore, is((int)(100.0 * 2.0/6.0)));
+        assertThat(heuristicGoalScore, is((int)(100.0 * 2.0/6.0)));
     }
 }
