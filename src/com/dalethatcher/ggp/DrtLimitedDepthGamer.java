@@ -13,6 +13,8 @@ import org.ggp.base.util.statemachine.exceptions.TransitionDefinitionException;
 import org.ggp.base.util.statemachine.implementation.prover.ProverStateMachine;
 
 public class DrtLimitedDepthGamer extends StateMachineGamer {
+    private int maxMoveEstimate = 1;
+
     @Override
     public StateMachine getInitialStateMachine() {
         return new ProverStateMachine();
@@ -20,14 +22,17 @@ public class DrtLimitedDepthGamer extends StateMachineGamer {
 
     @Override
     public void stateMachineMetaGame(long timeout) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
+        PossibleMovesEstimator estimator = new PossibleMovesEstimator();
 
+        maxMoveEstimate = estimator.estimateMaxPossibleMoves(getStateMachine(), timeout - 500);
     }
 
     @Override
     public Move stateMachineSelectMove(long timeout) throws TransitionDefinitionException, MoveDefinitionException, GoalDefinitionException {
         DrtLimitedDepthExpander expander = new DrtLimitedDepthExpander(getCurrentState());
 
-        return expander.findBestDepthLimitedMove(getStateMachine(), getRole(), timeout - 500, (a, b, c) -> 0, 2);
+        return expander.findBestDepthLimitedMove(getStateMachine(), getRole(), timeout - 500,
+                new MobilityHeuristic(maxMoveEstimate), 3);
     }
 
     @Override
