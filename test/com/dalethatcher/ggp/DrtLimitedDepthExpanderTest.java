@@ -35,7 +35,7 @@ public class DrtLimitedDepthExpanderTest {
 
         DrtLimitedDepthExpander expander = new DrtLimitedDepthExpander(rootState);
         Move bestMove = expander.findBestDepthLimitedMove(stateMachine, role, System.currentTimeMillis() + 1000,
-                (a, b) -> 0, 0);
+                (sM, s, r) -> 0, 0);
 
         Move expectedMove = new Move(
                 getFunction(getConstant("move"), newArrayList(getConstant("A"), getConstant("B"))));
@@ -53,7 +53,7 @@ public class DrtLimitedDepthExpanderTest {
 
         DrtLimitedDepthExpander expander = new DrtLimitedDepthExpander(rootState);
         Move bestMove = expander.findBestDepthLimitedMove(stateMachine, role, System.currentTimeMillis() + 1000,
-                (stateMachine, state) -> 10, 0);
+                (sM, s, r) -> 10, 0);
 
         Move expectedMove = new Move(
                 getFunction(getConstant("move"), newArrayList(getConstant("A"), getConstant("C"))));

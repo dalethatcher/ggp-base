@@ -8,7 +8,6 @@ import org.ggp.base.util.statemachine.StateMachine;
 import org.ggp.base.util.statemachine.exceptions.MoveDefinitionException;
 
 import java.util.List;
-import java.util.function.BiFunction;
 
 public class DrtLimitedDepthExpander {
     private final DelayedExpansionTreeNode root;
@@ -18,7 +17,7 @@ public class DrtLimitedDepthExpander {
     }
 
     public Move findBestDepthLimitedMove(StateMachine stateMachine, Role role, long expiryTime,
-                                         BiFunction<StateMachine, MachineState, Integer> goalHeuristic, int maxDepth) {
+                                         HeuristicGoalFunction heuristicGoalFunction, int maxDepth) {
         try {
             List<Move> movesForRole = stateMachine.getLegalMoves(root.getState(), role);
 
@@ -32,7 +31,7 @@ public class DrtLimitedDepthExpander {
 
             for (List<Move> candidate : root.getPossibleMoves(stateMachine)) {
                 DelayedExpansionTreeNode child = root.expandMove(stateMachine, candidate);
-                int goal = calculateGoalForMove(stateMachine, role, expiryTime, child, goalHeuristic, maxDepth);
+                int goal = calculateGoalForMove(stateMachine, role, expiryTime, child, heuristicGoalFunction, maxDepth);
 
                 if (goal > bestGoal) {
                     if (goal == 100) {
@@ -64,10 +63,10 @@ public class DrtLimitedDepthExpander {
 
     private int calculateGoalForMove(StateMachine stateMachine, Role role, long expiryTime,
                                      DelayedExpansionTreeNode node,
-                                     BiFunction<StateMachine, MachineState, Integer> goalHeuristic, int maxDepth) {
+                                     HeuristicGoalFunction heuristicGoalFunction, int maxDepth) {
         try {
             if (node.isTerminal(stateMachine) || maxDepth == 0) {
-                return getGoal(stateMachine, role, goalHeuristic, node);
+                return getGoal(stateMachine, role, heuristicGoalFunction, node);
             } else {
                 List<Move> possibleMoves = stateMachine.getLegalMoves(node.getState(), role);
                 NodeType nodeType = (possibleMoves.size() == 1) ? NodeType.MIN : NodeType.MAX;
@@ -75,7 +74,8 @@ public class DrtLimitedDepthExpander {
 
                 for (List<Move> childMove : node.getPossibleMoves(stateMachine)) {
                     DelayedExpansionTreeNode child = node.expandMove(stateMachine, childMove);
-                    int goal = calculateGoalForMove(stateMachine, role, expiryTime, child, goalHeuristic, maxDepth - 1);
+                    int goal = calculateGoalForMove(stateMachine, role, expiryTime, child, heuristicGoalFunction,
+                            maxDepth - 1);
 
                     if (nodeType == NodeType.MAX) {
                         if (goal == 100) {
@@ -104,12 +104,12 @@ public class DrtLimitedDepthExpander {
     }
 
     private int getGoal(StateMachine stateMachine, Role role,
-                        BiFunction<StateMachine, MachineState, Integer> goalHeuristic, DelayedExpansionTreeNode node) {
+                        HeuristicGoalFunction heuristicGoalFunction, DelayedExpansionTreeNode node) {
         try {
             return node.getGoal(stateMachine, role);
         }
         catch (Exception e) {
-            return goalHeuristic.apply(stateMachine, node.getState());
+            return heuristicGoalFunction.apply(stateMachine, node.getState(), role);
         }
     }
 }
