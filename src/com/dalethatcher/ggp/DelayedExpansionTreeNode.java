@@ -175,4 +175,12 @@ public class DelayedExpansionTreeNode {
                 ", unexploredMoves=" + unexploredMoves +
                 '}';
     }
+
+    public List<Move> getPossibleMovesForRole(StateMachine stateMachine, Role role) {
+        try {
+            return stateMachine.getLegalMoves(state, role);
+        } catch (MoveDefinitionException e) {
+            throw Throwables.propagate(e);
+        }
+    }
 }
